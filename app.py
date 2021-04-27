@@ -37,8 +37,10 @@ def answer():
         'question': request.json["question"],
         'context': context
     })
+    answer = response_bert.get("answer", "No answer available.")
+    confidence = response_bert.get("score", "No confidence available")
     response = app.response_class(
-        response=response_bert.get("answer", "No answer available."),
+        response=f"{answer} (Confidence: {confidence:.4f})",
         status=200,
         mimetype='application/json'
     )
