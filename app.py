@@ -16,6 +16,7 @@ limiter = Limiter(
 def answer():
 
     from transformers import AutoTokenizer, MobileBertForQuestionAnswering, pipeline
+    import requests
 
     modelname = "csarron/mobilebert-uncased-squad-v2"
 
@@ -23,8 +24,22 @@ def answer():
     tokenizer = AutoTokenizer.from_pretrained(modelname)
 
     nlp = pipeline("question-answering", model=model, tokenizer=tokenizer)
-    with open("merkel.txt", "r") as file:
-        context = file.read()
+    response = requests.get(
+        "https://en.wikipedia.org/w/api.php",
+        params={
+            "action": "query",
+            "format": "json",
+            "titles": "Angela_Merkel",
+            "prop": "extracts",
+            "explaintext": True,
+        },
+    )
+
+    json_content = response.json()["query"]["pages"]
+
+    context = ""
+    for key in json_content.keys():
+        context += json_content[key]["extract"]
 
     response_bert = nlp({"question": request.json["question"], "context": context})
     answer = response_bert.get("answer", "No answer available.")
